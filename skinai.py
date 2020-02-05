@@ -60,7 +60,7 @@ def _get_test_data_loader(test_batch_size, training_dir, **kwargs):
         transforms.Resize(225),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
-        transforms.Normilize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
+        transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
 
     ])
     dataset = datasets.ImageFolder(training_dir+"/test", transforms=test_transforms)
