@@ -48,7 +48,7 @@ def _get_train_data_loader(batch_size, training_dir, is_distributed, **kwargs):
         transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
 
     ])
-    dataset = datasets.ImageFolder(training_dir+"/train", train=True, transform=train_transforms)
+    dataset = datasets.ImageFolder(training_dir+"/train", transform=train_transforms)
     train_sampler = torch.utils.data.distributed.DistributedSampler(dataset) if is_distributed else None
     return torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=train_sampler is None,
                                        sampler=train_sampler, **kwargs)
@@ -63,7 +63,7 @@ def _get_test_data_loader(test_batch_size, training_dir, **kwargs):
         transforms.Normilize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
 
     ])
-    dataset = datasets.ImageFolder(training_dir+"/test", train=False, transforms=test_transforms)
+    dataset = datasets.ImageFolder(training_dir+"/test", transforms=test_transforms)
     return torch.utils.data.DataLoader(dataset, batch_size=test_batch_size, shuffle=True, **kwargs)
 
 
