@@ -63,7 +63,7 @@ def _get_test_data_loader(test_batch_size, training_dir, **kwargs):
         transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
 
     ])
-    dataset = datasets.ImageFolder(training_dir+"/test", transforms=test_transforms)
+    dataset = datasets.ImageFolder(training_dir+"/test", transform=test_transforms)
     return torch.utils.data.DataLoader(dataset, batch_size=test_batch_size, shuffle=True, **kwargs)
 
 
