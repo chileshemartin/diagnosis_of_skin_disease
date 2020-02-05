@@ -19,29 +19,33 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 
 
 # Based on https://github.com/pytorch/examples/blob/master/mnist/main.py
-class Net(nn.Model):
+class Net(nn.Module):
 
     def __init__(self):
-        self.fc1 = nn.Liner(2048, 1000)
-        self.fc2 = nn.Linear(1000,23)
-        self.dropout1(0.8)
-        self.dropout2(0.2)
+        super(Net, self).__init__()
+        self.conv1 = nn.Conv2d(2048, 1000, kernel_size=5)
+        self.conv2 = nn.Conv2d(1000, 512, kernel_size=5)
+        self.conv2_drop = nn.Dropout2d()
+        self.fc1 = nn.Linear(512, 256)
+        self.fc2 = nn.Linear(256, 47)
 
-    def forward():
-        x = self.ReLu(self.fc1)
-        x = self.dropout1(x)
+    def forward(self, x):
+        x = F.relu(F.max_pool2d(self.conv1(x), 2))
+        x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
+        x = x.view(-1, 512)
+        x = F.relu(self.fc1(x))
+        x = F.dropout(x, training=self.training)
         x = self.fc2(x)
-        x = self.dropout2(x)
-        return self.LogSoftMax(x)
+        return F.log_softmax(x, dim=1)
 
 def _get_train_data_loader(batch_size, training_dir, is_distributed, **kwargs):
     logger.info("Get train data loader")
     train_transforms = transforms.Compose([
-        transfroms.CenterCrop(224),
+        transforms.CenterCrop(224),
         transforms.RandomRotation(30),
-        transfomrs.RandomHorizontalFlip(),
-        transfomrs.ToTensor(),
-        transfoms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
 
     ])
     dataset = datasets.ImageFolder(training_dir+"/train", train=True, transform=train_transforms)
@@ -59,7 +63,7 @@ def _get_test_data_loader(test_batch_size, training_dir, **kwargs):
         transforms.Normilize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
 
     ])
-    datset = datasets.ImageFolder(training_dir+"/test", train=False, transforms=test_transforms)
+    dataset = datasets.ImageFolder(training_dir+"/test", train=False, transforms=test_transforms)
     return torch.utils.data.DataLoader(dataset, batch_size=test_batch_size, shuffle=True, **kwargs)
 
 
@@ -111,7 +115,7 @@ def train(args):
     model = models.resnet152(pretrained=True)
 
     # freeze parameters so we don't back prop on them
-     _freeze_params(model)
+    _freeze_params(model)
 
     # set architecture for the classification layer
     model.fc = Net()
